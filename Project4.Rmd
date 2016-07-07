@@ -1,0 +1,437 @@
+---
+output: html_document
+---
+White Wine Quality Data Exploration by Wenny Wu
+========================================================
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+setwd("C:/Users/Administrator/Desktop/DAND/4_Data Analysis with R/Project")
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+library(grid)
+library(GGally)
+```
+
+Let's look at the data and summary statistics:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Load the Data
+ww <- read.csv('wineQualityWhites.csv')
+str(ww)
+names(ww)
+summary(ww)
+```
+
+# Univariate Plots Section
+
+Let's look at the distribution of quality ratings and chemical properties.
+
+Most wines received a quality rating of 5 or 6. All quality ratings were between 3 and 9.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(ww$quality)
+
+qplot(quality, data = ww, binwidth = 1) +
+    scale_x_continuous(breaks = seq(0,10,1), lim = c(0,10))
+```
+
+Fixed acidity values were between 3.8 and 14.2. I used log10 to see the distribution clearer, and removed outliers (values < 4.8 and > 8.8).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(ww$fixed.acidity)
+Q1 <- quantile(ww$fixed.acidity)[2]
+Q3 <- quantile(ww$fixed.acidity)[4]
+IQR <- Q3-Q1
+LB <- Q1 - 1.5*IQR #lower outlier bound
+UB <- Q3 + 1.5*IQR #upper outlier bound
+
+qplot(fixed.acidity, data = ww, binwidth = 0.001) + 
+  scale_x_log10(lim = c(LB, UB), 
+                breaks = seq(min(ww$fixed.acidity), 
+                             max(ww$fixed.acidity), 1))
+```
+
+Volatile acidity values were betwwen 0.08 and 1.1. I used log10 to see the distribution clearer, and removed outliers (values > 0.485).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(ww$volatile.acidity)
+Q1 <- quantile(ww$volatile.acidity)[2]
+Q3 <- quantile(ww$volatile.acidity)[4]
+IQR <- Q3-Q1
+LB <- Q1 - 1.5*IQR #lower outlier bound
+UB <- Q3 + 1.5*IQR #upper outlier bound
+
+qplot(volatile.acidity, data = ww, binwidth = 0.005) +
+    scale_x_log10(lim = c(min(ww$volatile.acidity), UB), 
+                  breaks = seq(min(ww$volatile.acidity), 
+                               max(ww$volatile.acidity), 0.1))
+```
+
+Citric acid values were between 0 and 1.66. I used log10 to see the distribution clearer, and removed outliers (values < 0.09 and > 0.57).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(ww$citric.acid)
+Q1 <- quantile(ww$citric.acid)[2]
+Q3 <- quantile(ww$citric.acid)[4]
+IQR <- Q3-Q1
+LB <- Q1 - 1.5*IQR #lower outlier bound
+UB <- Q3 + 1.5*IQR #upper outlier bound
+
+qplot(citric.acid, data = ww, binwidth = 0.005) +
+    scale_x_log10(lim = c(LB, UB),
+                  breaks = seq(min(ww$volatile.acidity), 
+                               max(ww$volatile.acidity), 0.1))
+```
+
+Residual sugar values were between 0.6 and 65.8. I used log10 to see the distribution clearer, and removed outliers (values > 22.2). The distribution appears bimodal.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(ww$residual.sugar)
+Q1 <- quantile(ww$residual.sugar)[2]
+Q3 <- quantile(ww$residual.sugar)[4]
+IQR <- Q3-Q1
+LB <- Q1 - 1.5*IQR #lower outlier bound
+UB <- Q3 + 1.5*IQR #upper outlier bound
+
+qplot(residual.sugar, data = ww, binwidth = 0.01) + 
+  scale_x_log10(lim = c(min(ww$residual.sugar), UB), 
+                  breaks = seq(min(ww$residual.sugar), 
+                               max(ww$residual.sugar), 5.5))
+```
+
+Chloride values were between 0.009 and 0.346. I used log10 to see the distribution clearer, and removed outliers (values < 0.015 and > 0.017). The distribution looks slightly skewed to the right.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(ww$chlorides)
+Q1 <- quantile(ww$chlorides)[2]
+Q3 <- quantile(ww$chlorides)[4]
+IQR <- Q3-Q1
+LB <- Q1 - 1.5*IQR #lower outlier bound
+UB <- Q3 + 1.5*IQR #upper outlier bound
+
+qplot(chlorides, data = ww, binwidth = 0.005) + 
+  scale_x_log10(lim = c(LB, UB),
+                  breaks = seq(min(ww$chlorides), 
+                               max(ww$chlorides), 0.01))
+```
+
+Free sulfur dioxide values were between 2.0 and 289.0. I used log10 to see the distribution clearer, and removed outliers (values > 80.5). The distribution is skewed to the right.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(ww$free.sulfur.dioxide)
+Q1 <- quantile(ww$free.sulfur.dioxide)[2]
+Q3 <- quantile(ww$free.sulfur.dioxide)[4]
+IQR <- Q3-Q1
+LB <- Q1 - 1.5*IQR #lower outlier bound
+UB <- Q3 + 1.5*IQR #upper outlier bound
+
+qplot(free.sulfur.dioxide, data = ww, binwidth = 0.005) + 
+  scale_x_log10(lim = c(min(ww$free.sulfur.dioxide), UB),
+                  breaks = seq(min(ww$free.sulfur.dioxide), 
+                               max(ww$free.sulfur.dioxide), 8))
+```
+
+Total sulfur dioxide values were between 9.0 and 440.0. I used log10 to see the distribution clearer, and removed outliers (values < 19.5 and > 255.5). The distribution is skewed to the right.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(ww$total.sulfur.dioxide)
+Q1 <- quantile(ww$total.sulfur.dioxide)[2]
+Q3 <- quantile(ww$total.sulfur.dioxide)[4]
+IQR <- Q3-Q1
+LB <- Q1 - 1.5*IQR #lower outlier bound
+UB <- Q3 + 1.5*IQR #upper outlier bound
+
+qplot(total.sulfur.dioxide, data = ww, binwidth = 0.001) + 
+  scale_x_log10(lim = c(LB, UB),
+                  breaks = seq(min(ww$total.sulfur.dioxide), 
+                               max(ww$total.sulfur.dioxide), 25))
+```
+
+Density values were between 0.987 and 1.039 I used log10 to see the distribution clearer, and removed outliers (values > 1.003). The distribution seems scattered.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(ww$density)
+Q1 <- quantile(ww$density)[2]
+Q3 <- quantile(ww$density)[4]
+IQR <- Q3-Q1
+LB <- Q1 - 1.5*IQR #lower outlier bound
+UB <- Q3 + 1.5*IQR #upper outlier bound
+
+qplot(density, data = ww, binwidth = 0.00002) +
+    scale_x_log10(lim = c(min(ww$density), UB), 
+                  breaks = seq(min(ww$density), 1.00400, 0.002))
+```
+
+pH values were between 2.72 and 3.82. I removed outliers (values < 2.805 and > 3.565).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(ww$pH)
+Q1 <- quantile(ww$pH)[2]
+Q3 <- quantile(ww$pH)[4]
+IQR <- Q3-Q1
+LB <- Q1 - 1.5*IQR #lower outlier bound
+UB <- Q3 + 1.5*IQR #upper outlier bound
+
+qplot(pH, data = ww, binwidth = 0.005) + 
+  scale_x_continuous(lim = c(LB, UB))
+```
+
+Sulphate values were between 0.22 and 1.08. I removed outliers (values > 0.76).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(ww$sulphates)
+Q1 <- quantile(ww$sulphates)[2]
+Q3 <- quantile(ww$sulphates)[4]
+IQR <- Q3-Q1
+LB <- Q1 - 1.5*IQR #lower outlier bound
+UB <- Q3 + 1.5*IQR #upper outlier bound
+
+qplot(sulphates, data = ww, binwidth = 0.002) +
+  scale_x_continuous(lim = c(min(ww$sulphates), UB))
+```
+
+Alcohol content was between 8.0% and 14.2%. The distribution is skewed left and spread out.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(ww$alcohol)
+Q1 <- quantile(ww$alcohol)[2]
+Q3 <- quantile(ww$alcohol)[4]
+IQR <- Q3-Q1
+LB <- Q1 - 1.5*IQR #lower outlier bound
+UB <- Q3 + 1.5*IQR #upper outlier bound
+
+qplot(alcohol, data = ww, binwidth = 0.03)
+```
+
+
+# Univariate Analysis
+
+### What is the structure of your dataset?
+The dataframe contains 4,898 observations and 11 variables related to chemical properties of each wine: fixed acidity, volatile acidity, citric acid, residual sugar, chlorides, free sulfur dioxide, total sulfur dioxide, density, pH, sulphates, and alcohol content. At least 3 wine experts rated the quality of each wine, with 0 as the lowest rating and 10 as the highest rating.
+
+### What is/are the main feature(s) of interest in your dataset?
+Most wines had a quality rating of 5 or 6. 
+Residual sugar appears to have a bimodal distribution.
+Density and alcohol both show wide scattered distributions.
+
+### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+Understanding correlations between the different features.
+
+### Did you create any new variables from existing variables in the dataset?
+No
+
+### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
+Residual sugar has a bimodal distribution.
+A log10 scale was applied to all the plots of the chemical properties, except those for pH, sulphates, and alcohol, to better view the distribution. Outliers for the distributions of chemical properties were identified and removed.
+
+
+# Bivariate Plots Section
+
+Let's look to see if chemical properties of white wine are correlated.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggcorr(ww[,2:13],
+       label = TRUE,label_size = 2, label_round = 3, 
+       hjust = 1, legend.size = 7, layout.exp = 3)
+```
+
+Let's look at some of the relationships between these variables.
+
+Alcohol content was the chemical property with the highest (positive) correlation to wine quality. Wines with higher quality ratings tended to have higher alcohol content.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+cor(ww$alcohol, ww$quality)
+
+ggplot(aes(factor(quality), alcohol), data = ww) +
+  geom_boxplot()+
+  geom_jitter(alpha = 0.05)  +
+  geom_smooth(aes(quality-2, alcohol),
+                method = "lm", se = FALSE) + 
+  xlab('Quality') + 
+  ylab('Alcohol') +
+  ggtitle('Alcohol Level vs Quality')
+```
+
+Density was slightly negatively correlated with wine quality.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+cor(ww$density, ww$quality)
+
+ggplot(aes(factor(quality), density), data = ww) +
+  coord_cartesian(ylim = c(min(ww$density), 1.003)) +
+  geom_boxplot() + 
+  geom_jitter(alpha = 0.05)  +
+  geom_smooth(aes(quality-2, density),
+                method = "lm", se = FALSE) + 
+  xlab('Quality') + 
+  ylab('Density') +
+  ggtitle('Density vs Quality')
+```
+
+Alcohol and density showed a negative correlation.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+cor(ww$alcohol, ww$density)
+
+ggplot(ww, aes(x = alcohol, y = density)) +
+   geom_point(alpha = 1/20, position = position_jitter(h = 0), size = 1.5) +
+   coord_cartesian(ylim = c(min(ww$density), 1.003)) +
+   geom_smooth(method = 'lm')
+```
+
+Density and residual sugar showed the highest overall correlation amongst the chemical properties provided for white wine.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+cor(ww$density, ww$residual.sugar)
+
+ggplot(ww, aes(x = residual.sugar, y = density)) +
+   geom_point(alpha = 1/10, position = position_jitter(h = 0), size = 1.5) +
+   coord_cartesian(xlim = c(0, 22.2), ylim = c(min(ww$density), 1.003)) +
+   geom_smooth(method = 'lm')
+```
+
+Free sulfur dioxide is positively correlated with total sulfur dioxide.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+cor(ww$free.sulfur.dioxide, ww$total.sulfur.dioxide)
+
+ggplot(ww, aes(x = free.sulfur.dioxide, y = total.sulfur.dioxide)) +
+   geom_point(alpha = 1/20, position = position_jitter(h = 0), size = 1.5) +
+   coord_cartesian(xlim = c(min(ww$free.sulfur.dioxide), 80.5),
+                   ylim = c(19.5, 255.5)) +
+   geom_smooth(method = 'lm')
+```
+
+Fixed acidity is negatively correlated with pH.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+cor(ww$pH, ww$fixed.acidity)
+
+ggplot(ww, aes(x = pH, y = fixed.acidity)) +
+   geom_point(alpha = 1/20, position = position_jitter(h = 0), size = 1.5) +
+   coord_cartesian(ylim = c(4.8, 8.8)) +
+   geom_smooth(method = 'lm')
+```
+
+# Bivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+White wines with higher alcohol content tended to receive higher quality ratings. Alcohol was negatively correlated with density, and density is highly correlated with residual sugar content.
+
+### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+Many of the variables did not have strong correlations with each other, and quality was not very highly correlated with any of the chemical properties.
+
+### What was the strongest relationship you found?
+Density and residual sugar had a correlation coefficient of 0.839.
+
+
+# Multivariate Plots Section
+
+Run a simple linear regression with all variables.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+attach(ww)
+mod1 <-lm(formula=quality~alcohol+chlorides+citric.acid+density+fixed.acidity+free.sulfur.dioxide+pH+residual.sugar+sulphates+total.sulfur.dioxide+volatile.acidity)
+
+summary(mod1)
+```
+
+Chlorides, citric acid, and total sulfur dioxide are not statistically significant. Remove these variables from the linear regression model.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+attach(ww)
+mod2 <-lm(formula=quality~alcohol+density+fixed.acidity+free.sulfur.dioxide+pH+residual.sugar+sulphates+volatile.acidity)
+
+summary(mod2)
+hist(mod2$residuals)
+```
+
+Let's see how density and alcohol content relate to wine quality.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(data = ww, aes(x = alcohol, y = density, color = factor(quality))) +
+   geom_point(alpha = 1/2, position = position_jitter(h = 0), size = 1) +
+   coord_cartesian(ylim = c(0.987, 1.003)) +
+   geom_smooth(method = "lm", se = FALSE, size = 1) +
+   scale_color_brewer(type = 'qual') +
+   xlab('Alcohol') +
+   ylab('Density') +
+   ggtitle('Density vs. Alcohol by Quality')
+```
+
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+The simple linear regression model shows chlorides, citric acid, and total sulfur dioxide are not statistically significant.
+
+### Were there any interesting or surprising interactions between features?
+Higher quality wines had higher alcohol content/lower wine densities.
+
+### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
+I ran a simple linear regression model, adding all the chemical properties together, to determine which chemical properties were statistically significant. The model is limited in that it may not capture more complex interactions between features.
+
+
+# Final Plots and Summary
+
+### Plot One: Quality of White Wine
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+qplot(quality, data = ww, binwidth = 1, main = "Quality of White Wine") +
+  scale_x_continuous(breaks = seq(0,10,1), lim = c(0,10)) +
+  xlab('Quality') +
+  ylab('Quantity')
+```
+
+### Description One
+Let's revisit the quality of the white wines. The histogram of quality ratings shows most white wines received a rating of 5 or 6. 
+
+### Plot Two: Alcohol Level vs Quality
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(aes(factor(quality), alcohol), data = ww) +
+  geom_boxplot()+
+  geom_jitter(alpha = 0.05)  +
+  geom_smooth(aes(quality-2, alcohol),
+                method = "lm", se = FALSE) + 
+  xlab('Quality') + 
+  ylab('Alcohol') +
+  ggtitle('Alcohol Level vs Quality')
+```
+
+### Description Two
+Looking at relationships between wine quality and chemical properties, it appears white wines with higher alcohol content tended to receive higher quality ratings.
+
+### Plot Three: Density vs Alcohol by Quality
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(data = ww, aes(x = alcohol, y = density, color = factor(quality))) +
+   geom_point(alpha = 1/2, position = position_jitter(h = 0), size = 1) +
+   coord_cartesian(ylim = c(0.987, 1.003)) +
+   geom_smooth(method = "lm", se = FALSE, size = 1) +
+   scale_color_brewer(type = 'qual') +
+   xlab('Alcohol') +
+   ylab('Density') +
+   ggtitle('Density vs. Alcohol by Quality')
+```
+
+### Description Three
+Density is negatively correlated with alcohol content (-0.780), and we can see again that white wines with higher quality ratings have higher alcohol content and lower densitites.
+
+
+# Reflection
+##### My analysis of this data set shows:
+##### 1. Density and residual sugar are positively correlated and showed the highest correlation amongst chemical properties of white wines.
+##### 2. Density and alcohol content are negatively correlated.
+##### 3. Most white wines received a quality rating of 5 or 6.
+##### 4. Amongst the chemical properties, alcohol content showed the strongest correlation with wine quality. White wines with higher ratings typically had higher alcohol content.
+##### 5. Other chemical properties were not heavily correlated with each other or with wine quality.
+
+##### In conclusion, my investigation indicates that wine experts rate the wines mostly based on their personal preferences - vintage, sweet/dry, grape varietal, etc. Only alcohol content was slightly correlated with white wine quality.
+
+##### For future exploration, I would like to dive further into the wines in each quality rating category, searching for patterns amongst the chemical properties. I would also like to find data on vintage (year and region) and grape varietal to see if wines of a certain vintage or varietal tend to receive higher ratings.
+
+##### Throughout this data exploration process, I found challenges in creating proper visualizations to depict the data relationships I was investigating. I had to frequently adjust scales, remove outliers, and adjust font sizes and binwidths to make the data more readable. I switched my ggpairs chart to ggcorr to better read the correlations between the different variables.
+
+####References:
+####https://rstudio-pubs-static.s3.amazonaws.com/64329_b0ed679e48b04f00a404f6f969d855d7.html
+####https://rpubs.com/Daria/57835
+####http://docs.ggplot2.org/current/aes_group_order.html
